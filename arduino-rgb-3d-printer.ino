@@ -5,8 +5,9 @@
 
 // button used to change mode
 #define BTN_PIN A0
+// Leds have 3 mode
 #define MENU_SIZE 2
-
+// Used to know the current mode
 int posMenu = 0;
 
 // ===============================
@@ -45,7 +46,7 @@ void loop()
 }
 
 // ===============================
-//    Used to switch color mode
+//    Used to switch mode
 // ===============================
 
 void menu()

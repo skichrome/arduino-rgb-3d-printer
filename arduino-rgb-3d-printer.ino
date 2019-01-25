@@ -4,7 +4,7 @@
 #define BLUE_PIN 9
 
 // button used to change mode
-#define BTN_PIN A0
+#define BTN_PIN 2
 // Leds have 3 mode
 #define MENU_SIZE 2
 // Used to know the current mode
@@ -12,6 +12,8 @@ volatile int posMenu = 0;
 
 // Used to know if btn has been pressed
 volatile boolean isBtnDown = false;
+// to avoid kickback
+#define REBOND 1
 
 // ===============================
 //    Interrupt Method
@@ -19,10 +21,16 @@ volatile boolean isBtnDown = false;
 
 void interruptBtn()
 {
-  if (++posMenu > MENU_SIZE)
-    posMenu = 0;
+  static unsigned long dateLastChange = 0;
+  unsigned long date =  millis();
 
-  isBtnDown = true;
+  if ((date - dateLastChange) > REBOND)
+  {
+    if (++posMenu > MENU_SIZE)
+      posMenu = 0;
+    isBtnDown = true;
+    dateLastChange = date;
+  }
 }
 
 // ===============================
@@ -31,11 +39,13 @@ void interruptBtn()
 
 void setup()
 {
+  Serial.begin(9600);
+
   pinMode(RED_PIN, OUTPUT);
   pinMode(GREEN_PIN, OUTPUT);
   pinMode(BLUE_PIN, OUTPUT);
 
-  attachInterrupt(BTN_PIN, interruptBtn, FALLING);
+  attachInterrupt(digitalPinToInterrupt(BTN_PIN), interruptBtn, LOW);
   pinMode(BTN_PIN, INPUT_PULLUP);
 }
 
@@ -45,7 +55,10 @@ void setup()
 
 void loop()
 {
-  menu();
+  //menu();
+  Serial.println("PosMenu : " + posMenu);
+  if (isBtnDown)
+    isBtnDown = false;
 
   switch (posMenu)
   {
@@ -108,11 +121,8 @@ void breath()
   for (int i = 0; i < 255; i++)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
-    
+
     analogWrite(RED_PIN, i);
     analogWrite(BLUE_PIN, i);
     delay(5);
@@ -120,11 +130,8 @@ void breath()
   for (int i = 255; i >= 0; i--)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
-    
+
     analogWrite(RED_PIN, i);
     analogWrite(BLUE_PIN, i);
     delay(5);
@@ -133,11 +140,8 @@ void breath()
   for (int i = 0; i < 255; i++)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
-    
+
     analogWrite(GREEN_PIN, i);
     analogWrite(BLUE_PIN, i);
     delay(5);
@@ -145,11 +149,8 @@ void breath()
   for (int i = 255; i >= 0; i--)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
-    
+
     analogWrite(GREEN_PIN, i);
     analogWrite(BLUE_PIN, i);
     delay(5);
@@ -158,11 +159,8 @@ void breath()
   for (int i = 0; i < 255; i++)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
-    
+
     analogWrite(RED_PIN, i);
     analogWrite(GREEN_PIN, i);
     delay(5);
@@ -170,11 +168,8 @@ void breath()
   for (int i = 255; i >= 0; i--)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
-    
+
     analogWrite(RED_PIN, i);
     analogWrite(GREEN_PIN, i);
     delay(5);
@@ -183,11 +178,8 @@ void breath()
   for (int i = 0; i < 255; i++)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
-    
+
     analogWrite(RED_PIN, i);
     analogWrite(GREEN_PIN, i);
     analogWrite(BLUE_PIN, i);
@@ -196,11 +188,8 @@ void breath()
   for (int i = 255; i >= 0; i--)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
-    
+
     analogWrite(RED_PIN, i);
     analogWrite(GREEN_PIN, i);
     analogWrite(BLUE_PIN, i);
@@ -232,10 +221,7 @@ void positiveLoop(int pin)
   for (int i = 0; i <= 255; i++)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
     analogWrite(pin, i);
     delay(5);
   }
@@ -250,10 +236,7 @@ void negativeLoop(int pin)
   for (int i = 255; i >= 0; i--)
   {
     if (isBtnDown)
-    {
-      isBtnDown = !isBtnDown;
       break;
-    }
     analogWrite(pin, i);
     delay(5);
   }
